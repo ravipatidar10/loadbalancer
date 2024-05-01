@@ -1,0 +1,12 @@
+# flask
+fastapi
+requests
+gunicorn
+httpx
+# gevent
+uvicorn
+
+# quart
+# aiohttp
+# hypercorn
+# uvloop

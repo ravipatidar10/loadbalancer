@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  server:
+    build: './server'
+    deploy:
+      mode: replicated
+      replicas: $NO_OF_REPLICAS
+    
+  loadbalancer:
+    build: './load_balancer'
+    env_file:
+      - path: ./.env
+    # entrypoint: "gunicorn --worker-connections 1000 -b 0.0.0.0:5000 -k uvicorn.workers.UvicornWorker app:app"
+    # entrypoint: "hypercorn --workers=8 -b 0.0.0.0:5000 -k uvloop app:app"
+    entrypoint: "uvicorn --host 0.0.0.0 --port 5000 app3:app"
+    # entrypoint: "gunicorn --worker-connections 1000 -b 0.0.0.0:5000 -k uvicorn.workers.UvicornWorker app3:app"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "4.0"
+    #       memory: 500M
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "5000:5000"
+
+  

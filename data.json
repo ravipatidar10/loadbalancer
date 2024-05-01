@@ -1,0 +1,8 @@
+{
+    "scale_up": true,
+    "replicas": [
+        {
+            "server_name": "server1"
+        }
+    ]
+}
