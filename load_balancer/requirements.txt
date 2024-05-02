@@ -1,10 +1,12 @@
-# flask
-fastapi
+flask
+# fastapi
 requests
 gunicorn
 httpx
-# gevent
+gevent
 uvicorn
+celery
+redis
 
 # quart
 # aiohttp
