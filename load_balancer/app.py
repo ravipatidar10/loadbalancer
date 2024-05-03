@@ -47,54 +47,60 @@ def hello_world(path):
     busy_servers = 0
 
     lock.acquire()
-    servers = json.loads(cache.get('servers'))
-    
-    logging.error(f'{servers} {SERVER_MAX_REQUESTS}')
+    try:
+        servers = json.loads(cache.get('servers'))
+        
 
-    while True:
-        i += 1
-        if str(i) not in servers:
-            if i < NO_OF_REPLICAS:
-                i += 1
-                continue
-            break
-        if servers[str(i)]['requests'] < SERVER_MAX_REQUESTS:
-            server_url = servers[str(i)]['server_url']
-            servers[str(i)]['requests'] += 1
-            servers[str(i)]['last_request_time'] = datetime.utcnow().isoformat()
-            break
-        busy_servers += 1
-        if busy_servers == NO_OF_REPLICAS:
-            break
-    
-    logging.error(server_url)
-    if  not server_url:
-    # else:
-        if len(servers.keys()) >= NO_OF_REPLICAS:
-            NO_OF_REPLICAS += 1
-        os.system(f'docker compose scale server={NO_OF_REPLICAS}')
-        for j in range(1, NO_OF_REPLICAS+1):
-            if str(j) not in servers:
-                servers[str(NO_OF_REPLICAS)] = {
-                    'id': NO_OF_REPLICAS,
-                    'server_url': f'loadbalancer-server-{NO_OF_REPLICAS}',
-                    'requests': 1,
-                    'last_request_time': datetime.utcnow().isoformat()
-                } 
-            server_url = f'loadbalancer-server-{NO_OF_REPLICAS}'
-        i += 1
-        time.sleep(5)
-        # server_url = f'http://{server_url}:5000'
+        while True:
+            i += 1
+            if str(i) not in servers:
+                if i < NO_OF_REPLICAS:
+                    i += 1
+                    continue
+                break
+            if servers[str(i)]['requests'] < SERVER_MAX_REQUESTS:
+                server_url = servers[str(i)]['server_url']
+                servers[str(i)]['requests'] += 1
+                servers[str(i)]['last_request_time'] = datetime.utcnow().isoformat()
+                break
+            busy_servers += 1
+            if busy_servers == NO_OF_REPLICAS:
+                break
+        
+        logging.error(server_url)
+        if  not server_url:
+        # else:
+            if len(servers.keys()) >= NO_OF_REPLICAS:
+                if MAX_NO_OF_REPLICAS == -1 or NO_OF_REPLICAS <= MAX_NO_OF_REPLICAS:
+                    NO_OF_REPLICAS += 1
+            os.system(f'docker compose scale server={NO_OF_REPLICAS}')
+            j = 1
+            for j in range(1, NO_OF_REPLICAS+1):
+                if str(j) not in servers:
+                    servers[str(j)] = {
+                        'id': j,
+                        'server_url': f'loadbalancer-server-{j}',
+                        'requests': 1,
+                        'last_request_time': datetime.utcnow().isoformat()
+                    } 
+                server_url = f'loadbalancer-server-{NO_OF_REPLICAS}'
+            i = j
+            # server_url = f'http://{server_url}:5000'
 
-    cache.set('servers', json.dumps(servers))
+        cache.set('servers', json.dumps(servers))
 
-    scale_down.apply_async((i, ), eta=datetime.utcnow()+timedelta(minutes=TIME_FOR_SCALE_DOWN))
-    server_url = f'http://{server_url}:5000' 
+        scale_down.apply_async((i, ), eta=datetime.utcnow()+timedelta(minutes=TIME_FOR_SCALE_DOWN))
+        server_url = f'http://{server_url}:5000' 
 
-    full_url = f"{server_url}/{path}" 
-    req_type = request.method
+        logging.error(f'{servers} {SERVER_MAX_REQUESTS}')
+        full_url = f"{server_url}/{path}" 
+        req_type = request.method
 
+        time.sleep(2)
+    except Exception as e:
+        print(e)
     lock.release()
+
 
     logging.error(f"Sending request {i}")
     # logging.error(server_url)
@@ -108,9 +114,16 @@ def hello_world(path):
     elif req_type == 'DELETE':
         response = requests.delete(full_url)
 
-    servers[str(i)]['requests'] -= 1
-    cache.set('servers', json.dumps(servers))
-
+    lock.acquire()
+    try:
+        servers = json.loads(cache.get('servers'))
+        servers[str(i)]['requests'] -= 1
+        if servers[str(i)]['requests'] < 0:
+            servers[str(i)]['requests'] = 0
+        cache.set('servers', json.dumps(servers))
+    except Exception as e:
+        print(e)
+    lock.release()
     # if len(servers.keys()) > 1:
     #     for j in range(1, NO_OF_REPLICAS+1):
     #         if j not in servers:

@@ -29,6 +29,6 @@ def scale_down(server_id):
         os.system(f'docker stop {server_name}')
         servers.pop(str(server_id))
         cache.set('servers', json.dumps(servers))
-        logging.info(f'removing ********* {server_name}')
+        logging.info(f'removing ********* {server_name}, {servers}')
         
     return str(server_id)
