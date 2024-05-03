@@ -10,6 +10,9 @@ def reqs():
     if res.status_code == 200:
         success += 1
 
+def get_success():
+    return success
+
 def send_requests(n):
     global success
     success = 0
