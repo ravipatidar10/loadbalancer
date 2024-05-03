@@ -3,7 +3,7 @@ version: '3'
 services:
   server:
     build: './server'
-    entrypoint: "gunicorn -w $SERVER_MAX_REQUESTS -b 0.0.0.0:5000 -k gevent app:app"
+    entrypoint: "gunicorn -w $SERVER_MAX_WORKERS --worker-connections 10 -b 0.0.0.0:5000 app:app"
     deploy:
       mode: replicated
       replicas: $MIN_NO_OF_REPLICAS

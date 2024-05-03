@@ -25,6 +25,8 @@ def scale_down(server_id):
         (datetime.utcnow() - last_request_time).seconds >= TIME_FOR_SCALE_DOWN * 60
         and
         len(servers.keys()) > MIN_NO_OF_REPLICAS
+        and
+        server['requests'] <= 0
     ):
         os.system(f'docker stop {server_name}')
         servers.pop(str(server_id))
