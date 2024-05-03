@@ -17,7 +17,7 @@ servers = {}
 
 MIN_NO_OF_REPLICAS = int(os.environ.get('MIN_NO_OF_REPLICAS', 1))
 MAX_NO_OF_REPLICAS = int(os.environ.get('MAX_NO_OF_REPLICAS', -1))
-TIME_FOR_SCALE_DOWN = int(os.environ.get('TIME_FOR_SCALE_DOWN', 2))
+TIME_FOR_SCALE_DOWN = float(os.environ.get('TIME_FOR_SCALE_DOWN', 2))
 SERVER_MAX_REQUESTS = int(os.environ.get('SERVER_MAX_REQUESTS', 2))
 
 
