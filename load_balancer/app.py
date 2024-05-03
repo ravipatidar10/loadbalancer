@@ -145,9 +145,12 @@ def hello_world(path):
     # except Exception as e:
     lock.acquire()
     if response.status_code != 200:
-        servers = json.loads(cache.get('servers'))
-        servers.pop(i)
-        cache.set('servers', json.dumps(servers))
+        try:
+            servers = json.loads(cache.get('servers'))
+            servers.pop(i)
+            cache.set('servers', json.dumps(servers))
+        except Exception as e:
+            print(e)
     lock.release()
 
     lock.acquire()

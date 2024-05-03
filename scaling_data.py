@@ -14,13 +14,13 @@ def generate_data():
         res = subprocess.run(bash_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         res = res.stdout
         data.append([i, int(res), get_success()])
-        print(i*4, int(res), get_success())
-    for i in data:
-        print(data)    
+        print(f'{i},{int(res)},{get_success()}')
+    # for i in data:
+    #     print(data)    
 
 
 thrd = Thread(target=generate_data)
 thrd.start()
 success, t = send_requests(300)
-print(success, t)
+# print(success, t)
 thrd.join()
